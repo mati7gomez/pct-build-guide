@@ -9,8 +9,8 @@
     
     <style>
       html, body {
-        width: 100dvw;
-        height: 100dvh;
+        width: 100%; /* Changed from 100dvw to prevent Desktop Mode stretch */
+        height: 100%; /* Changed from 100dvh to prevent Desktop Mode stretch */
         margin: 0;
         padding: 0;
         overflow: hidden; /* Prevents scrolling */
@@ -22,8 +22,8 @@
       }
 
       #unity-container {
-        width: 100dvw !important;
-        height: 100dvh !important;
+        width: 100% !important;
+        height: 100% !important;
         position: absolute;
         top: 0;
         left: 0;
@@ -103,11 +103,23 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
+        
+        // This line is CRITICAL. It prevents the hitbox offset bug when users enable "Desktop Mode" on mobile.
+        config.devicePixelRatio = 1;
+
       } else {
-        // Desktop style: Replaced hardcoded pixels with dvh/dvw
-        canvas.style.width = "100dvw";
-        canvas.style.height = "100dvh";
+        // Desktop style: Render the game canvas dynamically filling 100%
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
       }
+      
+      // Force an explicit canvas recalculation to ensure hitboxes align with the stretched UI
+      window.addEventListener('resize', () => {
+         if(canvas) {
+             canvas.style.width = window.innerWidth + "px";
+             canvas.style.height = window.innerHeight + "px";
+         }
+      });
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
