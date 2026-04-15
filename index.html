@@ -3,18 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Plaza Cielo Tierra Trivia</title>
+    <title>Plaza Cielo Tierra Trivia</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     
     <style>
       html, body {
-        width: 100%; /* Changed from 100dvw to prevent Desktop Mode stretch */
-        height: 100%; /* Changed from 100dvh to prevent Desktop Mode stretch */
+        width: 100%;
+        height: 100%;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Prevents scrolling */
-        position: fixed;  /* Locks body in place to prevent keyboard push */
+        overflow: hidden; 
+        position: fixed;  
         top: 0;
         left: 0;
         touch-action: none; 
@@ -22,16 +22,12 @@
       }
 
       #unity-container {
-        width: 100% !important;
-        height: 100% !important;
         position: absolute;
         top: 0;
         left: 0;
       }
 
       #unity-canvas {
-        width: 100% !important;
-        height: 100% !important;
         display: block;
       }
     </style>
@@ -54,6 +50,7 @@
     
     <script>
       var canvas = document.querySelector("#unity-canvas");
+      var container = document.querySelector("#unity-container");
 
       // Shows a temporary message banner/ribbon for a few seconds, or
       // a permanent error message on top of the canvas if type=='error'.
@@ -107,19 +104,32 @@
         // This line is CRITICAL. It prevents the hitbox offset bug when users enable "Desktop Mode" on mobile.
         config.devicePixelRatio = 1;
 
-      } else {
-        // Desktop style: Render the game canvas dynamically filling 100%
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
       }
-      
-      // Force an explicit canvas recalculation to ensure hitboxes align with the stretched UI
-      window.addEventListener('resize', () => {
-         if(canvas) {
-             canvas.style.width = window.innerWidth + "px";
-             canvas.style.height = window.innerHeight + "px";
-         }
-      });
+
+      // --- NEW DYNAMIC RESIZE LOGIC ---
+      // This function asks the browser for the exact visible pixels right now, excluding the URL bar.
+      function resizeUnityContainer() {
+        var w = window.innerWidth + "px";
+        var h = window.innerHeight + "px";
+        
+        container.style.width = w;
+        container.style.height = h;
+        canvas.style.width = w;
+        canvas.style.height = h;
+      }
+
+      // Run it immediately
+      resizeUnityContainer();
+
+      // Listen for standard window resizing
+      window.addEventListener('resize', resizeUnityContainer);
+
+      // Listen for the Visual Viewport API (Supported by modern Chrome/iOS Safari)
+      // This fires when the URL bar shrinks/expands or the keyboard appears
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', resizeUnityContainer);
+      }
+      // --------------------------------
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
